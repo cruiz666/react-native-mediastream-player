@@ -1,3 +1,8 @@
+import Foundation
+import UIKit
+import AVFoundation
+import MediastreamPlatformSDKiOS
+
 @objc(MediastreamPlayerViewManager)
 class MediastreamPlayerViewManager: RCTViewManager {
 
@@ -12,9 +17,36 @@ class MediastreamPlayerViewManager: RCTViewManager {
 
 class MediastreamPlayerView : UIView {
 
+  let mdstrm = MediastreamPlatformSDK()
+
+  override init(frame: CGRect) {
+    super.init(frame: frame)
+    self.addSubview(mdstrm.view)
+  }
+
+  override func layoutSubviews() {
+      super.layoutSubviews()
+      mdstrm.view.frame = self.bounds
+  }
+
+  required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+  }
+
   @objc var color: String = "" {
     didSet {
       self.backgroundColor = hexStringToUIColor(hexColor: color)
+    }
+  }
+
+  @objc var config: NSDictionary = [:] {
+    didSet {
+      let config = config as! [String: Any]
+      let playerConfig = MediastreamPlayerConfig()
+      playerConfig.accountID = config["accountID"] as! String
+      playerConfig.id = config["id"] as! String
+      playerConfig.autoplay = config["autoplay"] as! Bool
+      mdstrm.setup(playerConfig)
     }
   }
 
